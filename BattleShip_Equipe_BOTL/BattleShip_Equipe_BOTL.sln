@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32901.215
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BattleShip_Equipe_BOTL", "BattleShip_Equipe_BOTL\BattleShip_Equipe_BOTL.csproj", "{9B2AEC5D-0550-4CA8-968D-341F62174F72}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test_serveur", "Test_serveur\Test_serveur.csproj", "{6A99A06A-E05E-4B19-B735-444780710F53}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9B2AEC5D-0550-4CA8-968D-341F62174F72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B2AEC5D-0550-4CA8-968D-341F62174F72}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B2AEC5D-0550-4CA8-968D-341F62174F72}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B2AEC5D-0550-4CA8-968D-341F62174F72}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A99A06A-E05E-4B19-B735-444780710F53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A99A06A-E05E-4B19-B735-444780710F53}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A99A06A-E05E-4B19-B735-444780710F53}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A99A06A-E05E-4B19-B735-444780710F53}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1E4F2D80-5794-442C-A975-A7754BA4BF0B}
+	EndGlobalSection
+EndGlobal
