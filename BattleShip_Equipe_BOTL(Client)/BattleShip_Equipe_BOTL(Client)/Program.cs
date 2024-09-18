@@ -10,6 +10,7 @@ namespace BattleShip_Equipe_BOTL_Client_
     {
         static async Task Main(string[] args)
         {
+            bool StartGame;
             //Création de la connexion utilisée
             ConnexionClient? LaConnexion = null;
 
@@ -22,21 +23,51 @@ namespace BattleShip_Equipe_BOTL_Client_
                 LaConnexion = await TentativeConnexion(getIp());
             }
 
+            //Recevoir la taille du serveur et accepter la taille du champ de bataille
+            char Réponse;
+            bool VérifChar;
 
-            
-            int replay;
+
+            int size= await LaConnexion.RecevoirTaille();
+
             do
             {
-                Gestion gestion = new Gestion();
-                int size = gestion.SaisirEntier("Entrer la longeur de la grille, de 4 à 10: ", 4, 10);
+                Console.Clear();
+                Console.WriteLine($"Le serveur souhaite jouer avec un grille de {size}x{size} acceptez-vous?\n Vous allez être deconnecté si vous refusez (y/n)");
+                string rep = Console.ReadLine().ToLower();
+                VérifChar = char.TryParse(rep, out Réponse);
 
-                await gestion.StartGame(size, LaConnexion);
+            } while (!VérifChar || (Réponse != 'y' && Réponse != 'n'));
 
-                replay = gestion.SaisirEntier("Rejouer? 1.Oui.  2.Non.", 1, 2);
+            if (Réponse == 'y')
+            {
+                await LaConnexion.EnvoyerConf(true);
+                StartGame = true;
+            }
+            else
+            {
+                await LaConnexion.EnvoyerConf(false);
+                StartGame=false;
+            }
 
-                await LaConnexion.EnvoyerConfirmatioon(replay);
 
-            } while (replay != 2);
+
+            if (StartGame)
+            {
+                int replay;
+                do
+                {
+                    Gestion gestion = new Gestion();
+
+                    await gestion.StartGame(size, LaConnexion);
+
+                    replay = gestion.SaisirEntier("Rejouer? 1.Oui.  2.Non.", 1, 2);
+
+                    await LaConnexion.EnvoyerConfirmatioon(replay);
+
+                } while (replay != 2);
+            }
+ 
         }
 
         static string getIp()
