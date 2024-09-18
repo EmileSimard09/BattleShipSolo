@@ -10,7 +10,7 @@ namespace BattleShip_Equipe_BOTL_Client_
     {
         static async Task Main(string[] args)
         {
-            bool StartGame;
+            
             //Création de la connexion utilisée
             ConnexionClient? LaConnexion = null;
 
@@ -23,36 +23,10 @@ namespace BattleShip_Equipe_BOTL_Client_
                 LaConnexion = await TentativeConnexion(getIp());
             }
 
-            //Recevoir la taille du serveur et accepter la taille du champ de bataille
-            char Réponse;
-            bool VérifChar;
+            //Get le tuple du la méthode qui gere la connexion
+            (bool play,int size) = await GestionTaille(LaConnexion);
 
-
-            int size= await LaConnexion.RecevoirTaille();
-
-            do
-            {
-                Console.Clear();
-                Console.WriteLine($"Le serveur souhaite jouer avec un grille de {size}x{size} acceptez-vous?\n Vous allez être deconnecté si vous refusez (y/n)");
-                string rep = Console.ReadLine().ToLower();
-                VérifChar = char.TryParse(rep, out Réponse);
-
-            } while (!VérifChar || (Réponse != 'y' && Réponse != 'n'));
-
-            if (Réponse == 'y')
-            {
-                await LaConnexion.EnvoyerConf(true);
-                StartGame = true;
-            }
-            else
-            {
-                await LaConnexion.EnvoyerConf(false);
-                StartGame=false;
-            }
-
-
-
-            if (StartGame)
+            if (play)
             {
                 int replay;
                 do
@@ -70,6 +44,40 @@ namespace BattleShip_Equipe_BOTL_Client_
  
         }
 
+        static async Task<(bool,int)> GestionTaille(ConnexionClient LaConnexion)
+        {
+            //Recevoir la taille du serveur et accepter la taille du champ de bataille
+            char Réponse;
+            bool VérifChar;
+            bool StartGame;
+
+
+            int size = await LaConnexion.RecevoirTaille();
+
+            do
+            {
+                Console.Clear();
+                Console.WriteLine($"Le serveur souhaite jouer avec un grille de {size}x{size} acceptez-vous?\n Vous allez être deconnecté si vous refusez (y/n)");
+                string rep = Console.ReadLine().ToLower();
+                VérifChar = char.TryParse(rep, out Réponse);
+
+            } while (!VérifChar || (Réponse != 'y' && Réponse != 'n'));
+
+            //envoie la bonne réponse et et mets le bool a true ou false
+            if (Réponse == 'y')
+            {
+                await LaConnexion.EnvoyerConf(true);
+                StartGame = true;
+            }
+            else
+            {
+                await LaConnexion.EnvoyerConf(false);
+                StartGame = false;
+            }
+
+            //Renvoie un tuple avec la bool et le int
+            return (StartGame, size);   
+        }
         static string getIp()
         {
             string adresseEntree;

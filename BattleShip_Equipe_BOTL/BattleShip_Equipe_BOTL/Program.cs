@@ -1,8 +1,10 @@
 ﻿using BattleShip_Equipe_BOTL.Class;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
+using static System.Collections.Specialized.BitVector32;
 
 namespace BattleShip_Equipe_BOTL
 {
@@ -14,7 +16,6 @@ namespace BattleShip_Equipe_BOTL
             while (true)
             {
                 //Déclaration des variables
-                bool verifSize = true;
                 bool verifReplay = false;
                 int conf;
                 Gestion gestion = new Gestion();
@@ -22,18 +23,7 @@ namespace BattleShip_Equipe_BOTL
                 //Init le serveur
                 ConnexionServer laCo = await InitServ();
 
-                //Ajouts de la descision de la taille par le serveur
-                Console.Clear();
-                int size = gestion.SaisirEntier("Entrer la longeur de la grille, de 4 à 10: ", 4, 10);
-
-                //Envoie la taille
-                await laCo.EnvoyerTaille(size);
-
-                //Recoit la confirmation 
-                bool confirmationTaille = await laCo.Recevoirconf();
-
-
-                if (confirmationTaille)
+                if (await GestionTaille(laCo,gestion))
                 {
                     try
                     {
@@ -59,10 +49,6 @@ namespace BattleShip_Equipe_BOTL
                 await laCo.FermerLaCo();
                 Console.Clear();
             }
-
-
-
-
         }
 
         async static Task<ConnexionServer> InitServ()
@@ -72,6 +58,19 @@ namespace BattleShip_Equipe_BOTL
             await connexionServer.Initialize();
             Console.WriteLine("The devise is connected");
             return connexionServer;
+        }
+
+        async static Task<bool> GestionTaille(ConnexionServer laCo, Gestion gestion)
+        {
+            //Ajouts de la descision de la taille par le serveur
+            Console.Clear();
+            int size = gestion.SaisirEntier("Entrer la longeur de la grille, de 4 à 10: ", 4, 10);
+
+            //Envoie la taille
+            await laCo.EnvoyerTaille(size);
+
+            //Recoit la confirmation 
+            return await laCo.Recevoirconf();
         }
     }
 }
