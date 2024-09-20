@@ -45,42 +45,52 @@ namespace BattleShip_Equipe_BOTL.Class
             do
             {
                 alliedBoard = await connexion.Recevoir();
+
                 bool cheats = CheatCheck(alliedBoard, enemyBoard, oldAlliedBoard, oldEnemyBoard);
+
+                bool hit = CheckIfShot(alliedBoard, oldAlliedBoard);
+                if (hit)
+                {
+                    Array.Copy(alliedBoard.board, oldAlliedBoard.board, alliedBoard.board.Length);
+                }
                 if (!cheats)
                 {
                     lost = isWinner(alliedBoard);
                     if (!lost)
                     {
-                        Console.Clear();
-                        //Enregistrement des tableaux
-                        Array.Copy(alliedBoard.board, oldAlliedBoard.board, alliedBoard.board.Length);
-                        Array.Copy(enemyBoard.board, oldEnemyBoard.board, enemyBoard.board.Length);
-
-                        //Affichage
-                        Console.WriteLine("Océan allié");
-                        ShowMyBoard(alliedBoard);
-                        Console.WriteLine("");
-                        Console.WriteLine("Océan ennemi");
-                        ShowEnemyBoard(enemyBoard);
-                        Console.WriteLine("");
-
-                        //Tir
-                        Shoot(enemyBoard);
-                        winner = isWinner(enemyBoard);
-                        if (!winner)
+                        if (!hit)
                         {
-                            await connexion.Envoyer(enemyBoard);
-                        }
-                        else
-                        {
-                            await connexion.Envoyer(enemyBoard);
                             Console.Clear();
-                            Console.ForegroundColor = ConsoleColor.Yellow;
-                            Console.WriteLine("You WIN!!!!!");
-                            Console.WriteLine("En attente du replay du client");
-                            Console.ForegroundColor = ConsoleColor.White;
-                            winner = true;
-                            verifGame = true;
+                            //Enregistrement des tableaux
+                            Array.Copy(alliedBoard.board, oldAlliedBoard.board, alliedBoard.board.Length);
+                            Array.Copy(enemyBoard.board, oldEnemyBoard.board, enemyBoard.board.Length);
+
+                            //Affichage
+                            Console.WriteLine("Océan allié");
+                            ShowMyBoard(alliedBoard);
+                            Console.WriteLine("");
+                            Console.WriteLine("Océan ennemi");
+                            ShowEnemyBoard(enemyBoard);
+                            Console.WriteLine("");
+
+                            //Tir
+                            Shoot(enemyBoard);
+                            winner = isWinner(enemyBoard);
+                            if (!winner)
+                            {
+                                await connexion.Envoyer(enemyBoard);
+                            }
+                            else
+                            {
+                                await connexion.Envoyer(enemyBoard);
+                                Console.Clear();
+                                Console.ForegroundColor = ConsoleColor.Yellow;
+                                Console.WriteLine("You WIN!!!!!");
+                                Console.WriteLine("En attente du replay du client");
+                                Console.ForegroundColor = ConsoleColor.White;
+                                winner = true;
+                                verifGame = true;
+                            }
                         }
                     }
                     else
@@ -134,6 +144,23 @@ namespace BattleShip_Equipe_BOTL.Class
             {
                 Console.Write("______");
             }
+        }
+
+        public bool CheckIfShot(Board currentAlliedBoard, Board oldAlliedBoard)
+        {
+            bool leCheck =false;
+            int nbCases = currentAlliedBoard.range * currentAlliedBoard.range;
+
+            for (int i = 0; i < nbCases; i++)
+            {
+                Case currentCase = currentAlliedBoard.board[i];
+
+                if (currentCase.isHit == true && oldAlliedBoard.board[i].isHit == false)
+                    leCheck = true;
+
+            }
+
+            return leCheck;
         }
 
         /// <summary>
@@ -269,33 +296,40 @@ namespace BattleShip_Equipe_BOTL.Class
         /// Demande à l'utilisateur sa position de tir, vérifie, et affiche le board ennemi.
         /// </summary>
         /// <param name="board">Board ennemi</param>
-        public void Shoot(Board board)
+        public bool Shoot(Board board)
         {
             int nbCases = board.range * board.range;
             int caseTir = SaisirEntier("Entrer la case à bombarder : ", 1, nbCases);
             bool shotFired = false;
+            bool Touché = false;
 
             do
             {
                 if (board.board[caseTir - 1].isHit == true)
                 {
+                    Console.WriteLine();
                     Console.WriteLine("Case déjà bombardée. Entrer une autre case : ");
                     caseTir = SaisirEntier("Entrer la case à bombarder", 1, nbCases);
                 }
                 else if (board.board[caseTir - 1].isBoat == false)
                 {
+                    Console.WriteLine();
                     Console.WriteLine("Splash! Raté.");
                     board.board[caseTir - 1].isHit = true;
                     shotFired = true;
                 }
                 else
                 {
+                    Console.WriteLine();
                     Console.WriteLine("BOOM! Touché!");
+                    Console.WriteLine("Vous allez pouvoir retirer...");
                     board.board[caseTir - 1].isHit = true;
                     shotFired = true;
+                    Touché = true;
                 }
             } while (!shotFired);
             ShowEnemyBoard(board);
+            return Touché;
         }
         /// <summary>
         /// vérifie que l'utilisateur entre un entier, min et max inclus

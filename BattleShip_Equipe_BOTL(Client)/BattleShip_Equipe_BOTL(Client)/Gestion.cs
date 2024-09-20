@@ -17,6 +17,7 @@ namespace BattleShip_Equipe_BOTL.Class
         bool verifGame = true;
         bool winner = true;
         bool lost = true;
+        bool Touché=false;
 
         public async Task StartGame(int size, ConnexionClient connexion)
         {
@@ -68,13 +69,23 @@ namespace BattleShip_Equipe_BOTL.Class
                         ShowEnemyBoard(enemyBoard);
 
                         //Tir
-                        Shoot(enemyBoard);
+                        Touché = Shoot(enemyBoard);
                         winner = isWinner(enemyBoard);
-                        //TODO Si isWinner == false, send son board à l'ennemi.
+                       
+
+                        if(!winner && Touché)
+                        {
+                            Console.WriteLine("Bravo, vous allez rejouer!!");
+                        }
+
                         if (!winner)
                         {
                             await connexion.Envoyer(enemyBoard);
-                            alliedBoard = await connexion.Recevoir();
+                            if (Touché)
+                            {
+                                alliedBoard = await connexion.Recevoir();
+                            }
+                                
                         }
                         else
                         {
@@ -269,33 +280,40 @@ namespace BattleShip_Equipe_BOTL.Class
         /// Demande à l'utilisateur sa position de tir, vérifie, et affiche le board ennemi.
         /// </summary>
         /// <param name="board">Board ennemi</param>
-        public void Shoot(Board board)
+        public bool Shoot(Board board)
         {
             int nbCases = board.range * board.range;
             int caseTir = SaisirEntier("Entrer la case à bombarder : ", 1, nbCases);
             bool shotFired = false;
+            bool Touché = false;
 
             do
             {
                 if (board.board[caseTir - 1].isHit == true)
                 {
+                    Console.WriteLine();
                     Console.WriteLine("Case déjà bombardée. Entrer une autre case : ");
                     caseTir = SaisirEntier("Entrer la case à bombarder", 1, nbCases);
                 }
                 else if (board.board[caseTir - 1].isBoat == false)
                 {
+                    Console.WriteLine();
                     Console.WriteLine("Splash! Raté.");
                     board.board[caseTir - 1].isHit = true;
                     shotFired = true;
                 }
                 else
                 {
+                    Console.WriteLine();
                     Console.WriteLine("BOOM! Touché!");
+                    Console.WriteLine("Vous allez pouvoir retirer...");
                     board.board[caseTir - 1].isHit = true;
                     shotFired = true;
+                    Touché = true;
                 }
             } while (!shotFired);
             ShowEnemyBoard(board);
+            return Touché;
         }
         /// <summary>
         /// vérifie que l'utilisateur entre un entier, min et max inclus
