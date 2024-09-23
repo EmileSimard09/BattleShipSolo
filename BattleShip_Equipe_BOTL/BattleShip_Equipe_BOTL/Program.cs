@@ -32,6 +32,7 @@ namespace BattleShip_Equipe_BOTL
                             verifReplay = false;
                             await gestion.StartGame(laCo);
                             //todo verif le replay
+
                             conf = await laCo.RecevoirConfirmation();
 
                             if (conf == 1)

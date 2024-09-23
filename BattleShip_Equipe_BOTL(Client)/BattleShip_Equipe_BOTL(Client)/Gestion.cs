@@ -50,7 +50,6 @@ namespace BattleShip_Equipe_BOTL.Class
                 //Tour normal
                 bool cheats = CheatCheck(alliedBoard, enemyBoard, oldAlliedBoard, oldEnemyBoard);
                 //Check Winner
-                //isWinner(alliedBoard)
                 if (!cheats)
                 {
                     lost = isWinner(alliedBoard);
@@ -81,11 +80,8 @@ namespace BattleShip_Equipe_BOTL.Class
                         if (!winner)
                         {
                             await connexion.Envoyer(enemyBoard);
-                            if (Touché)
-                            {
-                                alliedBoard = await connexion.Recevoir();
-                            }
-                                
+                            alliedBoard = await connexion.Recevoir();
+
                         }
                         else
                         {

@@ -14,7 +14,7 @@ namespace BattleShip_Equipe_BOTL.Class
         Board oldAlliedBoard;
         Board oldEnemyBoard;
         bool verifGame = true;
-        bool winner = true;
+        bool winner = false;
         bool  lost = true;
 
         public async Task StartGame(ConnexionServer connexion)
@@ -49,10 +49,7 @@ namespace BattleShip_Equipe_BOTL.Class
                 bool cheats = CheatCheck(alliedBoard, enemyBoard, oldAlliedBoard, oldEnemyBoard);
 
                 bool hit = CheckIfShot(alliedBoard, oldAlliedBoard);
-                if (hit)
-                {
-                    Array.Copy(alliedBoard.board, oldAlliedBoard.board, alliedBoard.board.Length);
-                }
+
                 if (!cheats)
                 {
                     lost = isWinner(alliedBoard);
@@ -91,6 +88,12 @@ namespace BattleShip_Equipe_BOTL.Class
                                 winner = true;
                                 verifGame = true;
                             }
+                        }
+                        else
+                        {
+                                Array.Copy(alliedBoard.board, oldAlliedBoard.board, alliedBoard.board.Length);
+                                await connexion.Envoyer(enemyBoard);
+
                         }
                     }
                     else
@@ -155,7 +158,7 @@ namespace BattleShip_Equipe_BOTL.Class
             {
                 Case currentCase = currentAlliedBoard.board[i];
 
-                if (currentCase.isHit == true && oldAlliedBoard.board[i].isHit == false)
+                if (currentCase.isBoat == true &&(currentCase.isHit == true && oldAlliedBoard.board[i].isHit == false))
                     leCheck = true;
 
             }
