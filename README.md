@@ -167,3 +167,22 @@ Changement de la méthode Shoot pour qu'elle retoure un void au lieu de void
             ShowEnemyBoard(board);
             return Touché;
         }
+
+Ajouts d'une methode qui verifie si l'adversaire a touche un de nos bateau
+
+        public bool CheckIfShot(Board currentAlliedBoard, Board oldAlliedBoard)
+        {
+            bool leCheck =false;
+            int nbCases = currentAlliedBoard.range * currentAlliedBoard.range;
+
+            for (int i = 0; i < nbCases; i++)
+            {
+                Case currentCase = currentAlliedBoard.board[i];
+
+                if (currentCase.isBoat == true &&(currentCase.isHit == true && oldAlliedBoard.board[i].isHit == false))
+                    leCheck = true;
+
+            }
+
+            return leCheck;
+        }

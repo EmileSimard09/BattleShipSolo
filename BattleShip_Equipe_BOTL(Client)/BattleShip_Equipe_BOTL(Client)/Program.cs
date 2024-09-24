@@ -17,6 +17,8 @@ namespace BattleShip_Equipe_BOTL_Client_
             //Établissement de la connexion
             LaConnexion = await TentativeConnexion(getIp());
 
+            
+
             while (LaConnexion == null)
             {
                 Console.WriteLine("Connexion invalide, veuillez ressayer");

@@ -49,50 +49,62 @@ namespace BattleShip_Equipe_BOTL.Class
             {
                 //Tour normal
                 bool cheats = CheatCheck(alliedBoard, enemyBoard, oldAlliedBoard, oldEnemyBoard);
+
+                bool hit = CheckIfShot(alliedBoard, oldAlliedBoard);
                 //Check Winner
                 if (!cheats)
                 {
                     lost = isWinner(alliedBoard);
                     if (!lost)
                     {
-                        Console.Clear();
-                        //Enregistrement des tableaux
-                        Array.Copy(alliedBoard.board, oldAlliedBoard.board, alliedBoard.board.Length);
-                        Array.Copy(enemyBoard.board, oldEnemyBoard.board, enemyBoard.board.Length);
-
-                        //Affichage
-                        Console.WriteLine("Océan allié");
-                        ShowMyBoard(alliedBoard);
-                        Console.WriteLine("");
-                        Console.WriteLine("Océan ennemi");
-                        ShowEnemyBoard(enemyBoard);
-
-                        //Tir
-                        Touché = Shoot(enemyBoard);
-                        winner = isWinner(enemyBoard);
-                       
-
-                        if(!winner && Touché)
+                        if (!hit)
                         {
-                            Console.WriteLine("Bravo, vous allez rejouer!!");
-                        }
+                            Console.Clear();
+                            //Enregistrement des tableaux
+                            Array.Copy(alliedBoard.board, oldAlliedBoard.board, alliedBoard.board.Length);
+                            Array.Copy(enemyBoard.board, oldEnemyBoard.board, enemyBoard.board.Length);
 
-                        if (!winner)
-                        {
-                            await connexion.Envoyer(enemyBoard);
-                            alliedBoard = await connexion.Recevoir();
+                            //Affichage
+                            Console.WriteLine("Océan allié");
+                            ShowMyBoard(alliedBoard);
+                            Console.WriteLine("");
+                            Console.WriteLine("Océan ennemi");
+                            ShowEnemyBoard(enemyBoard);
 
+                            //Tir
+                            Touché = Shoot(enemyBoard);
+                            winner = isWinner(enemyBoard);
+
+
+                            if (!winner && Touché)
+                            {
+                                Console.WriteLine("Bravo, vous allez rejouer!!");
+                            }
+
+                            if (!winner)
+                            {
+                                await connexion.Envoyer(enemyBoard);
+                                alliedBoard = await connexion.Recevoir();
+
+                            }
+                            else
+                            {
+                                await connexion.Envoyer(enemyBoard);
+                                Console.Clear();
+                                Console.ForegroundColor = ConsoleColor.Yellow;
+                                Console.WriteLine("You WIN!!!!!");
+                                Console.ForegroundColor = ConsoleColor.White;
+                                winner = true;
+                                verifGame = true;
+                            }
                         }
                         else
                         {
+                            Array.Copy(alliedBoard.board, oldAlliedBoard.board, alliedBoard.board.Length);
                             await connexion.Envoyer(enemyBoard);
-                            Console.Clear();
-                            Console.ForegroundColor = ConsoleColor.Yellow;
-                            Console.WriteLine("You WIN!!!!!");
-                            Console.ForegroundColor = ConsoleColor.White;
-                            winner = true;
-                            verifGame = true;
+                            alliedBoard = await connexion.Recevoir();
                         }
+
                     }
                     else
                     {
@@ -141,6 +153,23 @@ namespace BattleShip_Equipe_BOTL.Class
             {
                 Console.Write("______");
             }
+        }
+
+        public bool CheckIfShot(Board currentAlliedBoard, Board oldAlliedBoard)
+        {
+            bool leCheck = false;
+            int nbCases = currentAlliedBoard.range * currentAlliedBoard.range;
+
+            for (int i = 0; i < nbCases; i++)
+            {
+                Case currentCase = currentAlliedBoard.board[i];
+
+                if (currentCase.isBoat == true && (currentCase.isHit == true && oldAlliedBoard.board[i].isHit == false))
+                    leCheck = true;
+
+            }
+
+            return leCheck;
         }
 
         /// <summary>
