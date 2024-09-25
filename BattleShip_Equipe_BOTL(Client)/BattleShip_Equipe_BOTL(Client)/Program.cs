@@ -25,23 +25,43 @@ namespace BattleShip_Equipe_BOTL_Client_
                 LaConnexion = await TentativeConnexion(getIp());
             }
 
+            Console.WriteLine("En attente de la Taille de la partie...");
             //Get le tuple du la méthode qui gere la connexion
             (bool play,int size) = await GestionTaille(LaConnexion);
+            Gestion gestion = new Gestion();
+            bool continueGame = true;
 
             if (play)
             {
-                int replay;
                 do
                 {
-                    Gestion gestion = new Gestion();
+                    //TODO : Refaire les noms de methodes pour qu'ils soient plus clairs
+
+                    //C'est envoyer la taille mais il set d'envoie de int
+                    await LaConnexion.EnvoyerTaille(1);
+
+                    //Recevoir la taille sert de recevoir int
+                    int serverStatus = await LaConnexion.RecevoirTaille();
+                    if (serverStatus != 1)
+                    {
+                        //Si jamais le serveur bug ou est pas pret on sort de la boucle
+                        //peut etre pas optimal d<utiliser un break mais c'est la seule solution facile que j'ai trouvé
+                        break;
+                    }
+
 
                     await gestion.StartGame(size, LaConnexion);
 
-                    replay = gestion.SaisirEntier("Rejouer? 1.Oui.  2.Non.", 1, 2);
+ 
+                    int replay = gestion.SaisirEntier("Rejouer? 1.Oui.  2.Non.", 1, 2);
 
-                    await LaConnexion.EnvoyerConfirmatioon(replay);
+                    await LaConnexion.EnvoyerTaille(replay);
 
-                } while (replay != 2);
+  
+                    int serverReplayDecision = await LaConnexion.RecevoirTaille();
+                    continueGame = (serverReplayDecision == 1);
+
+                } while (continueGame);
             }
  
         }

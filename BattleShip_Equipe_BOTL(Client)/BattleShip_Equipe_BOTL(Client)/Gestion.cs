@@ -24,6 +24,12 @@ namespace BattleShip_Equipe_BOTL.Class
             //TODO Refactor cette methode pour qu'elle soit moins longue
             while (verifGame)
             {
+                Console.Clear();
+
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("Bienvenue dans le jeu de bataille navale! Il est temps de placer votre bateau de 2x1 !!");
+                Console.ForegroundColor = ConsoleColor.White;
+
                 alliedBoard = new Board(size);
                 enemyBoard = new Board(size);
                 oldAlliedBoard = new Board(size);
@@ -36,6 +42,10 @@ namespace BattleShip_Equipe_BOTL.Class
                 //TODO Client:Envoyer son board
                 await connexion.Envoyer(alliedBoard);
 
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("En attente du board ennemi...");
+                Console.ForegroundColor = ConsoleColor.White;
+
                 //Recevoir boat
                 enemyBoard = await connexion.Recevoir();
 
@@ -43,6 +53,9 @@ namespace BattleShip_Equipe_BOTL.Class
                 Array.Copy(enemyBoard.board, oldEnemyBoard.board, enemyBoard.board.Length);
 
                 verifGame = false;
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("C'est parti pour la bataille navale! Vous avez le premier coup!!");
+                Console.ForegroundColor = ConsoleColor.White;
             }
 
             do
@@ -60,6 +73,11 @@ namespace BattleShip_Equipe_BOTL.Class
                         if (!hit)
                         {
                             Console.Clear();
+
+                            Console.ForegroundColor = ConsoleColor.Magenta;
+                            Console.WriteLine("C'est à vous de jouer!");
+                            Console.ForegroundColor = ConsoleColor.White;
+
                             //Enregistrement des tableaux
                             Array.Copy(alliedBoard.board, oldAlliedBoard.board, alliedBoard.board.Length);
                             Array.Copy(enemyBoard.board, oldEnemyBoard.board, enemyBoard.board.Length);
@@ -84,6 +102,10 @@ namespace BattleShip_Equipe_BOTL.Class
                             if (!winner)
                             {
                                 await connexion.Envoyer(enemyBoard);
+
+                                Console.Clear();
+                                Console.WriteLine("En attente du tir de l'ennemi...");
+
                                 alliedBoard = await connexion.Recevoir();
 
                             }
@@ -102,6 +124,11 @@ namespace BattleShip_Equipe_BOTL.Class
                         {
                             Array.Copy(alliedBoard.board, oldAlliedBoard.board, alliedBoard.board.Length);
                             await connexion.Envoyer(enemyBoard);
+
+                            Console.ForegroundColor = ConsoleColor.Cyan;
+                            Console.WriteLine("Oof vous avez été touché,l'ennemie tire encore !");
+                            Console.ForegroundColor = ConsoleColor.White;
+
                             alliedBoard = await connexion.Recevoir();
                         }
 

@@ -186,3 +186,85 @@ Ajouts d'une methode qui verifie si l'adversaire a touche un de nos bateau
 
             return leCheck;
         }
+
+Sinon des petits ajouts dans la methode qui joue la game 
+                do
+            {
+                alliedBoard = await connexion.Recevoir();
+
+                bool cheats = CheatCheck(alliedBoard, enemyBoard, oldAlliedBoard, oldEnemyBoard);
+
+                bool hit = CheckIfShot(alliedBoard, oldAlliedBoard);
+
+                if (!cheats)
+                {
+                    lost = isWinner(alliedBoard);
+                    if (!lost)
+                    {
+                        if (!hit)
+                        {
+                            Console.Clear();
+                            //Enregistrement des tableaux
+                            Array.Copy(alliedBoard.board, oldAlliedBoard.board, alliedBoard.board.Length);
+                            Array.Copy(enemyBoard.board, oldEnemyBoard.board, enemyBoard.board.Length);
+
+                            //Affichage
+                            Console.WriteLine("Océan allié");
+                            ShowMyBoard(alliedBoard);
+                            Console.WriteLine("");
+                            Console.WriteLine("Océan ennemi");
+                            ShowEnemyBoard(enemyBoard);
+                            Console.WriteLine("");
+
+                            //Tir
+                            Shoot(enemyBoard);
+                            winner = isWinner(enemyBoard);
+                            if (!winner)
+                            {
+                                await connexion.Envoyer(enemyBoard);
+                            }
+                            else
+                            {
+                                await connexion.Envoyer(enemyBoard);
+                                Console.Clear();
+                                Console.ForegroundColor = ConsoleColor.Yellow;
+                                Console.WriteLine("You WIN!!!!!");
+                                Console.WriteLine("En attente du replay du client");
+                                Console.ForegroundColor = ConsoleColor.White;
+                                winner = true;
+                                verifGame = true;
+                            }
+                        }
+                        else
+                        {
+                                Array.Copy(alliedBoard.board, oldAlliedBoard.board, alliedBoard.board.Length);
+                                await connexion.Envoyer(enemyBoard);
+
+                        }
+                    }
+                    else
+                    {
+                        Console.Clear();
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.WriteLine("You Lost!!!!!");
+                        Console.ForegroundColor = ConsoleColor.White;
+                        Console.WriteLine("En attente du replay du client");
+                        winner = true;
+                        verifGame = true;
+                    }
+                       
+
+                }
+
+                
+            }
+            while (!winner);
+        
+En gros, avant de faire la boucle de jeu, on vérifie si on s'est fait toucher. Si oui, on saute notre tour et on envoie notre plateau inchangé. Dans le cas où on touche l'adversaire, celui-ci envoie son plateau inchangé et nous jouons notre tour suivant.
+
+J'ai aussi finalement ajouté des petits prompts qui manquaient.
+du genre
+-en attente de la size du board
+-en attente du coup adverse¨
+¨
+j'ai aussi rajouté des todos

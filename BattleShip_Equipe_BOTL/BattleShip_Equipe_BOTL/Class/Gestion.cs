@@ -15,14 +15,27 @@ namespace BattleShip_Equipe_BOTL.Class
         Board oldEnemyBoard;
         bool verifGame = true;
         bool winner = false;
-        bool  lost = true;
+        bool lost = true;
 
         public async Task StartGame(ConnexionServer connexion)
         {
             while (verifGame)
             {
+                //TODO :Rajouter des méthode pour ecrire des string en couleur pour sauver du code c'est lourd en criss
+
+                Console.Clear();
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("En attente du board du ennemi...");
+                Console.ForegroundColor = ConsoleColor.White;
+
                 //Get le board du client
                 enemyBoard = await connexion.Recevoir();
+
+                Console.Clear();
+
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("Bienvenue dans le jeu de bataille navale! Il est temps de placer votre bateau de 2x1 !!");
+                Console.ForegroundColor = ConsoleColor.White;
 
                 int size = enemyBoard.range;
 
@@ -39,6 +52,12 @@ namespace BattleShip_Equipe_BOTL.Class
                 Array.Copy(alliedBoard.board, oldAlliedBoard.board, alliedBoard.board.Length);
                 Array.Copy(enemyBoard.board, oldEnemyBoard.board, enemyBoard.board.Length);
                 verifGame = false;
+                winner = false;
+                Console.Clear();
+
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("C'est l'ennemi qui commence! En attente de son tir...");
+                Console.ForegroundColor = ConsoleColor.White;
             }
 
             //Tour normal
@@ -58,6 +77,11 @@ namespace BattleShip_Equipe_BOTL.Class
                         if (!hit)
                         {
                             Console.Clear();
+
+                            Console.ForegroundColor = ConsoleColor.Magenta;
+                            Console.WriteLine("L'ennemi a raté son tir! C'est à vous de jouer!");
+                            Console.ForegroundColor = ConsoleColor.White;
+
                             //Enregistrement des tableaux
                             Array.Copy(alliedBoard.board, oldAlliedBoard.board, alliedBoard.board.Length);
                             Array.Copy(enemyBoard.board, oldEnemyBoard.board, enemyBoard.board.Length);
@@ -76,6 +100,8 @@ namespace BattleShip_Equipe_BOTL.Class
                             if (!winner)
                             {
                                 await connexion.Envoyer(enemyBoard);
+                                Console.Clear();
+                                Console.WriteLine("En attente du tir de l'ennemi...");
                             }
                             else
                             {
@@ -91,8 +117,12 @@ namespace BattleShip_Equipe_BOTL.Class
                         }
                         else
                         {
-                                Array.Copy(alliedBoard.board, oldAlliedBoard.board, alliedBoard.board.Length);
-                                await connexion.Envoyer(enemyBoard);
+                            Array.Copy(alliedBoard.board, oldAlliedBoard.board, alliedBoard.board.Length);
+                            await connexion.Envoyer(enemyBoard);
+                            Console.Clear();
+                            Console.ForegroundColor = ConsoleColor.Cyan;
+                            Console.WriteLine("Oof vous avez été touché,l'ennemie tire encore !");
+                            Console.ForegroundColor = ConsoleColor.White;
 
                         }
                     }
@@ -106,11 +136,11 @@ namespace BattleShip_Equipe_BOTL.Class
                         winner = true;
                         verifGame = true;
                     }
-                       
+
 
                 }
 
-                
+
             }
             while (!winner);
         }
@@ -151,14 +181,14 @@ namespace BattleShip_Equipe_BOTL.Class
 
         public bool CheckIfShot(Board currentAlliedBoard, Board oldAlliedBoard)
         {
-            bool leCheck =false;
+            bool leCheck = false;
             int nbCases = currentAlliedBoard.range * currentAlliedBoard.range;
 
             for (int i = 0; i < nbCases; i++)
             {
                 Case currentCase = currentAlliedBoard.board[i];
 
-                if (currentCase.isBoat == true &&(currentCase.isHit == true && oldAlliedBoard.board[i].isHit == false))
+                if (currentCase.isBoat == true && (currentCase.isHit == true && oldAlliedBoard.board[i].isHit == false))
                     leCheck = true;
 
             }
