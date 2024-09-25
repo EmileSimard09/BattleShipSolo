@@ -17,7 +17,8 @@ namespace BattleShip_Equipe_BOTL
             {
                 //Déclaration des variables
                 bool verifReplay = false;
-                int conf;
+                bool continueGame = true;
+
                 Gestion gestion = new Gestion();
 
                 //Init le serveur
@@ -29,15 +30,30 @@ namespace BattleShip_Equipe_BOTL
                     {
                         do
                         {
-                            verifReplay = false;
+                            bool readyToStart = false;
+
+                            // Wait for client to be ready
+                            while (!readyToStart)
+                            {
+                                int clientStatus = await laCo.RecevoirConfirmation();
+                                if (clientStatus == 1)
+                                {
+                                    readyToStart = true;
+                                    await laCo.EnvoyerTaille(1);
+                                }
+                            }
+
+                            // Start the game
                             await gestion.StartGame(laCo);
-                            //todo verif le replay
-                            conf = await laCo.RecevoirConfirmation();
 
-                            if (conf == 1)
-                                verifReplay = true;
+                            
+                            int confirm = await laCo.RecevoirConfirmation();
+                            continueGame = (confirm == 1);
 
-                        } while (verifReplay);
+                            
+                            await laCo.EnvoyerTaille(continueGame ? 1 : 2);
+
+                        } while (continueGame);
                     }
                     catch (Exception ex)
                     {

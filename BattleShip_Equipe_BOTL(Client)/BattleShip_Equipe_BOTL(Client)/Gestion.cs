@@ -17,12 +17,19 @@ namespace BattleShip_Equipe_BOTL.Class
         bool verifGame = true;
         bool winner = true;
         bool lost = true;
+        bool Touché=false;
 
         public async Task StartGame(int size, ConnexionClient connexion)
         {
             //TODO Refactor cette methode pour qu'elle soit moins longue
             while (verifGame)
             {
+                Console.Clear();
+
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("Bienvenue dans le jeu de bataille navale! Il est temps de placer votre bateau de 2x1 !!");
+                Console.ForegroundColor = ConsoleColor.White;
+
                 alliedBoard = new Board(size);
                 enemyBoard = new Board(size);
                 oldAlliedBoard = new Board(size);
@@ -35,6 +42,10 @@ namespace BattleShip_Equipe_BOTL.Class
                 //TODO Client:Envoyer son board
                 await connexion.Envoyer(alliedBoard);
 
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("En attente du board ennemi...");
+                Console.ForegroundColor = ConsoleColor.White;
+
                 //Recevoir boat
                 enemyBoard = await connexion.Recevoir();
 
@@ -42,50 +53,85 @@ namespace BattleShip_Equipe_BOTL.Class
                 Array.Copy(enemyBoard.board, oldEnemyBoard.board, enemyBoard.board.Length);
 
                 verifGame = false;
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("C'est parti pour la bataille navale! Vous avez le premier coup!!");
+                Console.ForegroundColor = ConsoleColor.White;
             }
 
             do
             {
                 //Tour normal
                 bool cheats = CheatCheck(alliedBoard, enemyBoard, oldAlliedBoard, oldEnemyBoard);
+
+                bool hit = CheckIfShot(alliedBoard, oldAlliedBoard);
                 //Check Winner
-                //isWinner(alliedBoard)
                 if (!cheats)
                 {
                     lost = isWinner(alliedBoard);
                     if (!lost)
                     {
-                        Console.Clear();
-                        //Enregistrement des tableaux
-                        Array.Copy(alliedBoard.board, oldAlliedBoard.board, alliedBoard.board.Length);
-                        Array.Copy(enemyBoard.board, oldEnemyBoard.board, enemyBoard.board.Length);
-
-                        //Affichage
-                        Console.WriteLine("Océan allié");
-                        ShowMyBoard(alliedBoard);
-                        Console.WriteLine("");
-                        Console.WriteLine("Océan ennemi");
-                        ShowEnemyBoard(enemyBoard);
-
-                        //Tir
-                        Shoot(enemyBoard);
-                        winner = isWinner(enemyBoard);
-                        //TODO Si isWinner == false, send son board à l'ennemi.
-                        if (!winner)
+                        if (!hit)
                         {
-                            await connexion.Envoyer(enemyBoard);
-                            alliedBoard = await connexion.Recevoir();
+                            Console.Clear();
+
+                            Console.ForegroundColor = ConsoleColor.Magenta;
+                            Console.WriteLine("C'est à vous de jouer!");
+                            Console.ForegroundColor = ConsoleColor.White;
+
+                            //Enregistrement des tableaux
+                            Array.Copy(alliedBoard.board, oldAlliedBoard.board, alliedBoard.board.Length);
+                            Array.Copy(enemyBoard.board, oldEnemyBoard.board, enemyBoard.board.Length);
+
+                            //Affichage
+                            Console.WriteLine("Océan allié");
+                            ShowMyBoard(alliedBoard);
+                            Console.WriteLine("");
+                            Console.WriteLine("Océan ennemi");
+                            ShowEnemyBoard(enemyBoard);
+
+                            //Tir
+                            Touché = Shoot(enemyBoard);
+                            winner = isWinner(enemyBoard);
+
+
+                            if (!winner && Touché)
+                            {
+                                Console.WriteLine("Bravo, vous allez rejouer!!");
+                            }
+
+                            if (!winner)
+                            {
+                                await connexion.Envoyer(enemyBoard);
+
+                                Console.Clear();
+                                Console.WriteLine("En attente du tir de l'ennemi...");
+
+                                alliedBoard = await connexion.Recevoir();
+
+                            }
+                            else
+                            {
+                                await connexion.Envoyer(enemyBoard);
+                                Console.Clear();
+                                Console.ForegroundColor = ConsoleColor.Yellow;
+                                Console.WriteLine("You WIN!!!!!");
+                                Console.ForegroundColor = ConsoleColor.White;
+                                winner = true;
+                                verifGame = true;
+                            }
                         }
                         else
                         {
+                            Array.Copy(alliedBoard.board, oldAlliedBoard.board, alliedBoard.board.Length);
                             await connexion.Envoyer(enemyBoard);
-                            Console.Clear();
-                            Console.ForegroundColor = ConsoleColor.Yellow;
-                            Console.WriteLine("You WIN!!!!!");
+
+                            Console.ForegroundColor = ConsoleColor.Cyan;
+                            Console.WriteLine("Oof vous avez été touché,l'ennemie tire encore !");
                             Console.ForegroundColor = ConsoleColor.White;
-                            winner = true;
-                            verifGame = true;
+
+                            alliedBoard = await connexion.Recevoir();
                         }
+
                     }
                     else
                     {
@@ -134,6 +180,23 @@ namespace BattleShip_Equipe_BOTL.Class
             {
                 Console.Write("______");
             }
+        }
+
+        public bool CheckIfShot(Board currentAlliedBoard, Board oldAlliedBoard)
+        {
+            bool leCheck = false;
+            int nbCases = currentAlliedBoard.range * currentAlliedBoard.range;
+
+            for (int i = 0; i < nbCases; i++)
+            {
+                Case currentCase = currentAlliedBoard.board[i];
+
+                if (currentCase.isBoat == true && (currentCase.isHit == true && oldAlliedBoard.board[i].isHit == false))
+                    leCheck = true;
+
+            }
+
+            return leCheck;
         }
 
         /// <summary>
@@ -269,33 +332,40 @@ namespace BattleShip_Equipe_BOTL.Class
         /// Demande à l'utilisateur sa position de tir, vérifie, et affiche le board ennemi.
         /// </summary>
         /// <param name="board">Board ennemi</param>
-        public void Shoot(Board board)
+        public bool Shoot(Board board)
         {
             int nbCases = board.range * board.range;
             int caseTir = SaisirEntier("Entrer la case à bombarder : ", 1, nbCases);
             bool shotFired = false;
+            bool Touché = false;
 
             do
             {
                 if (board.board[caseTir - 1].isHit == true)
                 {
+                    Console.WriteLine();
                     Console.WriteLine("Case déjà bombardée. Entrer une autre case : ");
                     caseTir = SaisirEntier("Entrer la case à bombarder", 1, nbCases);
                 }
                 else if (board.board[caseTir - 1].isBoat == false)
                 {
+                    Console.WriteLine();
                     Console.WriteLine("Splash! Raté.");
                     board.board[caseTir - 1].isHit = true;
                     shotFired = true;
                 }
                 else
                 {
+                    Console.WriteLine();
                     Console.WriteLine("BOOM! Touché!");
+                    Console.WriteLine("Vous allez pouvoir retirer...");
                     board.board[caseTir - 1].isHit = true;
                     shotFired = true;
+                    Touché = true;
                 }
             } while (!shotFired);
             ShowEnemyBoard(board);
+            return Touché;
         }
         /// <summary>
         /// vérifie que l'utilisateur entre un entier, min et max inclus
