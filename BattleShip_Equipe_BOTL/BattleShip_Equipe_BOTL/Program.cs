@@ -32,7 +32,7 @@ namespace BattleShip_Equipe_BOTL
                         {
                             bool readyToStart = false;
 
-                            // Wait for client to be ready
+                            //attente du client
                             while (!readyToStart)
                             {
                                 int clientStatus = await laCo.RecevoirConfirmation();
@@ -43,7 +43,7 @@ namespace BattleShip_Equipe_BOTL
                                 }
                             }
 
-                            // Start the game
+                            //decolle la game
                             await gestion.StartGame(laCo);
 
                             
