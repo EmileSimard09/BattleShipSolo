@@ -21,6 +21,7 @@ namespace BattleShip_Equipe_BOTL.Class
 
         public async Task StartGame(int size, ConnexionClient connexion)
         {
+            //TODO plus de commentaires pls
             //TODO Refactor cette methode pour qu'elle soit moins longue
             while (verifGame)
             {
@@ -58,6 +59,7 @@ namespace BattleShip_Equipe_BOTL.Class
                 Console.ForegroundColor = ConsoleColor.White;
             }
 
+            //TODO: Refactor cette boucle pour qu'elle soit plus lisible et la découper en plusieurs méthodes
             do
             {
                 //Tour normal
